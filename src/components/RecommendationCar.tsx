@@ -1,7 +1,7 @@
+import { Car, CarService } from '@/lib/car-service';
+import { useLocalSearchParams, useRouter } from 'expo-router';
 import React, { useEffect, useState } from 'react';
-import { View, Text, TouchableOpacity, ActivityIndicator } from 'react-native';
-import { useRouter, useLocalSearchParams } from 'expo-router';
-import { CarService, Car } from '@/lib/car-service';
+import { ActivityIndicator, Text, TouchableOpacity, View } from 'react-native';
 import { CarCard } from './CarCard';
 
 export function RecommendationCar() {
@@ -34,9 +34,9 @@ export function RecommendationCar() {
       }
     };
     fetchCars();
-  }, [searchParams]);
+  }, [JSON.stringify(searchParams)]);
 
-  if (isLoading) {
+  if (isLoading && cars.length === 0) {
     return (
       <View className="py-8 items-center justify-center">
         <ActivityIndicator size="small" color="#2563eb" />
@@ -49,7 +49,7 @@ export function RecommendationCar() {
   };
 
   return (
-    <View className="px-6 mb-8 mt-4">
+    <View className={`px-6 mb-8 mt-4 ${isLoading ? 'opacity-60' : ''}`}>
       <View className="flex-row justify-between items-center mb-5">
         <Text className="text-gray-400 font-bold text-sm">Recommendation Car</Text>
       </View>

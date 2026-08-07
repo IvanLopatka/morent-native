@@ -1,7 +1,7 @@
+import { Car, CarService } from '@/lib/car-service';
+import { useLocalSearchParams, useRouter } from 'expo-router';
 import React, { useEffect, useState } from 'react';
-import { View, Text, TouchableOpacity, FlatList, ActivityIndicator } from 'react-native';
-import { useRouter, useLocalSearchParams } from 'expo-router';
-import { CarService, Car } from '@/lib/car-service';
+import { ActivityIndicator, FlatList, Text, TouchableOpacity, View } from 'react-native';
 import { CarCard } from './CarCard';
 
 export function PopularCar() {
@@ -34,9 +34,9 @@ export function PopularCar() {
       }
     };
     fetchCars();
-  }, [searchParams]);
+  }, [JSON.stringify(searchParams)]);
 
-  if (isLoading) {
+  if (isLoading && cars.length === 0) {
     return (
       <View className="py-8 items-center justify-center">
         <ActivityIndicator size="small" color="#2563eb" />
@@ -47,7 +47,7 @@ export function PopularCar() {
   if (cars.length === 0) return null;
 
   return (
-    <View className="px-6 mb-6">
+    <View className={`px-6 mb-6 ${isLoading ? 'opacity-60' : ''}`}>
       <View className="flex-row justify-between items-center mb-4">
         <Text className="text-gray-400 font-bold text-sm">Popular Car</Text>
         <TouchableOpacity onPress={() => router.push('/explore' as any)}>
