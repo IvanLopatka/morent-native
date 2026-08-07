@@ -1,16 +1,15 @@
-import React from 'react';
-import { ScrollView, Platform, View } from 'react-native';
-import { useSafeAreaInsets } from 'react-native-safe-area-context';
-
-import { MobileSearch } from '@/components/MobileSearch';
-import { RentalCarCard } from '@/components/RentalCarCard';
-import { MobileAd } from '@/components/MobileAd';
+import { AboutUs } from '@/components/AboutUs';
 import { CompareCars } from '@/components/CompareCars';
+import { MobileSearch } from '@/components/MobileSearch';
+import { NavigationBar } from '@/components/NavigationBar';
 import { PopularCar } from '@/components/PopularCar';
 import { RecommendationCar } from '@/components/RecommendationCar';
-import { AboutUs } from '@/components/AboutUs';
+import { RentalCarCard } from '@/components/RentalCarCard';
 import { BottomTabInset, MaxContentWidth, Spacing } from '@/constants/theme';
 import { useTheme } from '@/hooks/use-theme';
+import React from 'react';
+import { Platform, ScrollView, View } from 'react-native';
+import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
 export default function HomeScreen() {
   const safeAreaInsets = useSafeAreaInsets();
@@ -40,9 +39,10 @@ export default function HomeScreen() {
       ]}
     >
       <View style={{ width: '100%', maxWidth: MaxContentWidth }}>
+        <NavigationBar />
         <MobileSearch />
         <RentalCarCard />
-        <MobileAd />
+
         <CompareCars />
         <PopularCar />
         <RecommendationCar />
