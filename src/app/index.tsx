@@ -42,7 +42,6 @@ export default function HomeScreen() {
         <NavigationBar />
         <MobileSearch />
         <RentalCarCard />
-
         <CompareCars />
         <PopularCar />
         <RecommendationCar />

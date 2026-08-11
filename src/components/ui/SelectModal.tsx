@@ -1,5 +1,6 @@
 import React from 'react';
-import { FlatList, Modal, SafeAreaView, Text, TouchableOpacity, View } from 'react-native';
+import { FlatList, Modal, Text, TouchableOpacity, View } from 'react-native';
+import { SafeAreaView } from 'react-native-safe-area-context';
 
 interface SelectModalProps {
   visible: boolean;
