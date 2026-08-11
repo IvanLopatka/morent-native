@@ -1,9 +1,9 @@
-import React, { useState, useEffect } from 'react';
-import { View, Text, TouchableOpacity } from 'react-native';
-import { Image } from 'expo-image';
-import { useRouter } from 'expo-router';
 import { CarService } from '@/lib/car-service';
 import { supabase } from '@/utils/supabase/client';
+import { Image } from 'expo-image';
+import { useRouter } from 'expo-router';
+import React, { useEffect, useState } from 'react';
+import { Text, TouchableOpacity, View } from 'react-native';
 
 interface CarCardProps {
   id: string;
@@ -52,8 +52,7 @@ export function CarCard({
   };
 
   const handleRentNow = () => {
-    // Navigate to exploration/catalog page with car ID
-    router.push(`/explore?id=${id}` as any);
+    router.push(`/catalog/${id}` as any);
   };
 
   return (

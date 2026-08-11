@@ -50,7 +50,7 @@ export function PopularCar() {
     <View className={`px-6 mb-6 ${isLoading ? 'opacity-60' : ''}`}>
       <View className="flex-row justify-between items-center mb-4">
         <Text className="text-gray-400 font-bold text-sm">Popular Car</Text>
-        <TouchableOpacity onPress={() => router.push('/explore' as any)}>
+        <TouchableOpacity onPress={() => router.push('/catalog' as any)}>
           <Text className="text-blue-600 font-bold text-sm">View all</Text>
         </TouchableOpacity>
       </View>

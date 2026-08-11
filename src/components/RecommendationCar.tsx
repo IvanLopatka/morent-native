@@ -45,7 +45,7 @@ export function RecommendationCar() {
   }
 
   const handleShowMore = () => {
-    router.push('/explore' as any);
+    router.push('/catalog' as any);
   };
 
   return (
@@ -57,7 +57,7 @@ export function RecommendationCar() {
       {cars.length === 0 ? (
         <View className="flex-col items-center justify-center py-10 bg-gray-50 rounded-2xl border border-dashed border-gray-200">
           <Text className="text-gray-500 font-medium">No cars found matching filters.</Text>
-          <TouchableOpacity onPress={() => router.push('/explore' as any)} className="mt-2">
+          <TouchableOpacity onPress={() => router.push('/catalog' as any)} className="mt-2">
             <Text className="text-blue-600 font-bold">Clear all filters</Text>
           </TouchableOpacity>
         </View>
