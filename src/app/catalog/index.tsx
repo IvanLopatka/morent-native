@@ -33,6 +33,7 @@ export default function CatalogScreen() {
 
   return (
     <ScrollView
+      removeClippedSubviews={false}
       style={{ flex: 1, backgroundColor: theme.background }}
       contentContainerStyle={[
         {

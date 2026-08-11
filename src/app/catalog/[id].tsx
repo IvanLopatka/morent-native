@@ -38,6 +38,7 @@ export default function CarDetailScreen() {
 
   return (
     <ScrollView
+      removeClippedSubviews={false}
       style={{ flex: 1, backgroundColor: theme.background }}
       contentContainerStyle={{
         paddingBottom: safeAreaInsets.bottom + BottomTabInset + Spacing.four,

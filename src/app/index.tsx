@@ -29,6 +29,7 @@ export default function HomeScreen() {
 
   return (
     <ScrollView
+      removeClippedSubviews={false}
       style={{ flex: 1, backgroundColor: theme.background }}
       contentContainerStyle={[
         {
