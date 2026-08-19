@@ -86,7 +86,10 @@ export function NavigationBar() {
         </TouchableOpacity>
 
         {/* Profile Avatar */}
-        <TouchableOpacity className="w-11 h-11 rounded-full overflow-hidden border border-gray-200 bg-gray-50">
+        <TouchableOpacity 
+          onPress={() => router.push('/auth/AuthModal' as any)}
+          className="w-11 h-11 rounded-full overflow-hidden border border-gray-200 bg-gray-50"
+        >
           <Image
             source={require('@/assets/images/profile.svg')}
             className="w-full h-full"
