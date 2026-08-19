@@ -169,7 +169,7 @@ export default function AuthModal() {
           className="flex-row items-center justify-center border border-gray-200 bg-white rounded-2xl py-3 w-full gap-3 shadow-sm mb-6"
         >
           <Image
-            source={require('@/assets/images/react-logo.png')} // Generic logo asset
+            source={require('@/assets/images/google.svg')}
             style={{ width: 20, height: 20 }}
           />
           <Text className="text-gray-700 font-bold text-sm">
