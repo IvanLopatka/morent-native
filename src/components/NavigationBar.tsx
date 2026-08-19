@@ -1,8 +1,9 @@
 import { useTheme } from '@/hooks/use-theme';
 import { Image } from 'expo-image';
 import { useLocalSearchParams, useRouter } from 'expo-router';
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { Text, TextInput, TouchableOpacity, View } from 'react-native';
+import { supabase } from '@/utils/supabase/client';
 
 export function NavigationBar() {
   const router = useRouter();
@@ -10,6 +11,24 @@ export function NavigationBar() {
   const searchParam = (params.search as string) || '';
   const [searchVal, setSearchVal] = useState(searchParam);
   const theme = useTheme();
+  const [isAuthenticated, setIsAuthenticated] = useState(false);
+  const [avatarUrl, setAvatarUrl] = useState<string | null>(null);
+
+  useEffect(() => {
+    supabase.auth.getSession().then(({ data: { session } }) => {
+      setIsAuthenticated(!!session);
+      setAvatarUrl(session?.user?.user_metadata?.avatar_url || session?.user?.user_metadata?.picture || null);
+    });
+
+    const { data: { subscription } } = supabase.auth.onAuthStateChange((_event, session) => {
+      setIsAuthenticated(!!session);
+      setAvatarUrl(session?.user?.user_metadata?.avatar_url || session?.user?.user_metadata?.picture || null);
+    });
+
+    return () => {
+      subscription.unsubscribe();
+    };
+  }, []);
 
   const handleSearch = (val: string) => {
     setSearchVal(val);
@@ -85,16 +104,29 @@ export function NavigationBar() {
           />
         </TouchableOpacity>
 
-        {/* Profile Avatar */}
         <TouchableOpacity 
-          onPress={() => router.push('/auth/AuthModal' as any)}
-          className="w-11 h-11 rounded-full overflow-hidden border border-gray-200 bg-gray-50"
+          onPress={() => {
+            if (isAuthenticated) {
+              router.push('/profile' as any);
+            } else {
+              router.push('/auth/AuthModal' as any);
+            }
+          }}
+          className="w-11 h-11 rounded-full overflow-hidden border border-gray-200 bg-gray-50 items-center justify-center"
         >
-          <Image
-            source={require('@/assets/images/profile.svg')}
-            className="w-full h-full"
-            contentFit="cover"
-          />
+          {avatarUrl ? (
+            <Image
+              source={{ uri: avatarUrl }}
+              className="w-full h-full"
+              contentFit="cover"
+            />
+          ) : (
+            <Image
+              source={require('@/assets/images/profile.svg')}
+              className="w-full h-full"
+              contentFit="cover"
+            />
+          )}
         </TouchableOpacity>
       </View>
     </View>

@@ -35,7 +35,7 @@ export default function AuthModal() {
           password,
         });
         if (error) throw error;
-        router.back();
+        router.replace('/profile');
       }
     } catch (error: any) {
       showAlert('Authentication Error', error.message || 'Something went wrong.');
@@ -75,7 +75,7 @@ export default function AuthModal() {
               refresh_token: refreshToken,
             });
             if (sessionError) throw sessionError;
-            router.back();
+            router.replace('/profile');
           }
         }
       }

@@ -20,6 +20,7 @@ export default function RootLayout() {
           <Stack.Screen name="index" />
           <Stack.Screen name="explore" />
           <Stack.Screen name="auth/AuthModal" options={{ presentation: 'modal' }} />
+          <Stack.Screen name="profile/index" />
         </Stack>
       </ThemeProvider>
     </Provider>
