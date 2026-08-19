@@ -99,6 +99,7 @@ export function MobileSearch() {
           ) : (
             <FlatList
               data={searchResults.slice(0, 5)}
+              scrollEnabled={false}
               keyExtractor={(item) => item.id}
               keyboardShouldPersistTaps="handled"
               renderItem={({ item }) => (
