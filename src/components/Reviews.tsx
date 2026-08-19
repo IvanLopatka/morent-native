@@ -1,7 +1,7 @@
-import React, { useState } from 'react';
-import { View, Text, TouchableOpacity, ScrollView } from 'react-native';
+import { Reviews as ReviewsData } from '@/lib/reviews-data';
 import { Image } from 'expo-image';
-import { Reviews as ReviewsData } from '../lib/reviews-data';
+import React, { useState } from 'react';
+import { Text, TouchableOpacity, View } from 'react-native';
 
 export function Reviews() {
   const [showAll, setShowAll] = useState(false);

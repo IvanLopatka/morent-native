@@ -1,4 +1,13 @@
-export const Reviews = [
+export interface Review {
+  id: number;
+  name: string;
+  rating: number;
+  comment: string;
+  date: string;
+  position: string;
+}
+
+export const Reviews: Review[] = [
   {
     id: 1,
     name: "John Doe",

@@ -37,7 +37,10 @@ export const CarService = {
 
   async getAllCars(filters?: Partial<CarFilters> & { pickUpLocation?: string }, client?: SupabaseClient): Promise<Car[]> {
     const activeClient = client || supabase;
-    let query = activeClient.from('cars').select('*');
+    let query = activeClient
+      .from('cars')
+      .select('*')
+      .not('thumbnail', 'like', '/%');
 
     if (filters) {
       if (filters.pickUpLocation) {
