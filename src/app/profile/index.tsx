@@ -25,32 +25,32 @@ export default function ProfileScreen() {
   const [user, setUser] = useState<UserProfile | null>(null);
 
   useEffect(() => {
-    checkUser();
-  }, []);
-
-  const checkUser = async () => {
-    try {
-      const { data: { session }, error } = await supabase.auth.getSession();
-      if (error || !session) {
-        // Not authenticated, redirect to auth modal
-        router.replace('/auth/AuthModal');
-        return;
+    // Listen for auth state changes so we don't redirect before storage finishes persisting session
+    const { data: { subscription } } = supabase.auth.onAuthStateChange((_event, session) => {
+      if (session) {
+        const authUser = session.user;
+        setUser({
+          id: authUser.id,
+          email: authUser.email,
+          name: authUser.user_metadata?.full_name || authUser.user_metadata?.name || 'Morent Member',
+          avatarUrl: authUser.user_metadata?.avatar_url || authUser.user_metadata?.picture || null,
+          createdAt: authUser.created_at,
+        });
+        setIsLoading(false);
+      } else {
+        setIsLoading(false);
+        // Only redirect if unauthenticated after initial auth check
+        router.replace('/');
+        setTimeout(() => {
+          router.push('/auth/AuthModal' as any);
+        }, 50);
       }
-      
-      const authUser = session.user;
-      setUser({
-        id: authUser.id,
-        email: authUser.email,
-        name: authUser.user_metadata?.full_name || authUser.user_metadata?.name || 'Morent Member',
-        avatarUrl: authUser.user_metadata?.avatar_url || authUser.user_metadata?.picture || null,
-        createdAt: authUser.created_at,
-      });
-    } catch (err) {
-      router.replace('/auth/AuthModal');
-    } finally {
-      setIsLoading(false);
-    }
-  };
+    });
+
+    return () => {
+      subscription.unsubscribe();
+    };
+  }, []);
 
   const handleSignOut = async () => {
     setIsLoading(true);

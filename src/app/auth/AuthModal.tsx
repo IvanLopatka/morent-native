@@ -1,11 +1,8 @@
-import React, { useState } from 'react';
-import { View, Text, TextInput, TouchableOpacity, ActivityIndicator, Alert, Platform } from 'react-native';
-import { useRouter } from 'expo-router';
-import * as WebBrowser from 'expo-web-browser';
-import { Image } from 'expo-image';
 import { supabase } from '@/utils/supabase/client';
-
-WebBrowser.maybeCompleteAuthSession();
+import { GoogleSignin } from '@react-native-google-signin/google-signin';
+import { useRouter } from 'expo-router';
+import React, { useEffect, useState } from 'react';
+import { ActivityIndicator, Alert, Platform, Text, TextInput, TouchableOpacity, View } from 'react-native';
 
 export default function AuthModal() {
   const router = useRouter();
@@ -13,6 +10,26 @@ export default function AuthModal() {
   const [password, setPassword] = useState('');
   const [isSignUp, setIsSignUp] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
+
+  useEffect(() => {
+    if (Platform.OS !== 'web') {
+      try {
+        GoogleSignin.configure({
+          webClientId: process.env.EXPO_PUBLIC_GOOGLE_WEB_CLIENT_ID,
+        });
+      } catch (error) {
+        console.error('GoogleSignin configure error:', error);
+      }
+    }
+  }, []);
+
+  const dismissModal = () => {
+    if (router.canGoBack()) {
+      router.back();
+    } else {
+      router.replace('/');
+    }
+  };
 
   const handleAuth = async () => {
     if (!email.trim() || !password.trim()) {
@@ -35,7 +52,7 @@ export default function AuthModal() {
           password,
         });
         if (error) throw error;
-        router.replace('/profile');
+        dismissModal();
       }
     } catch (error: any) {
       showAlert('Authentication Error', error.message || 'Something went wrong.');
@@ -47,40 +64,38 @@ export default function AuthModal() {
   const handleGoogleSignIn = async () => {
     setIsLoading(true);
     try {
-      const redirectUrl = Platform.select({
-        web: window.location.origin,
-        default: 'morentnative://google-auth',
-      });
+      if (Platform.OS === 'web') {
+        const { error } = await supabase.auth.signInWithOAuth({
+          provider: 'google',
+          options: {
+            redirectTo: window.location.origin,
+          },
+        });
+        if (error) throw error;
+      } else {
+        await GoogleSignin.hasPlayServices();
+        const userInfo = await GoogleSignin.signIn();
+        const idToken = userInfo.data?.idToken || (userInfo as any).idToken;
 
-      const { data, error } = await supabase.auth.signInWithOAuth({
-        provider: 'google',
-        options: {
-          redirectTo: redirectUrl,
-          skipBrowserRedirect: Platform.OS !== 'web',
-        },
-      });
-
-      if (error) throw error;
-
-      if (Platform.OS !== 'web' && data?.url) {
-        const result = await WebBrowser.openAuthSessionAsync(data.url, redirectUrl);
-        if (result.type === 'success' && result.url) {
-          const params = new URL(result.url).hash.substring(1);
-          const accessToken = new URLSearchParams(params).get('access_token');
-          const refreshToken = new URLSearchParams(params).get('refresh_token');
-
-          if (accessToken && refreshToken) {
-            const { error: sessionError } = await supabase.auth.setSession({
-              access_token: accessToken,
-              refresh_token: refreshToken,
-            });
-            if (sessionError) throw sessionError;
-            router.replace('/profile');
-          }
+        if (!idToken) {
+          throw new Error('No ID token found from Google Sign-In');
         }
+
+        const { data, error } = await supabase.auth.signInWithIdToken({
+          provider: 'google',
+          token: idToken,
+        });
+
+        if (error) {
+          console.error('Authorization error:', error.message);
+          throw error;
+        }
+
+        console.log('Successfully authenticated with Supabase:', data.user);
+        dismissModal();
       }
     } catch (error: any) {
-      showAlert('Google Auth Error', error.message || 'OAuth flow failed.');
+      showAlert('Google Auth Error', error.message || 'Authentication failed.');
     } finally {
       setIsLoading(false);
     }
@@ -97,10 +112,10 @@ export default function AuthModal() {
   return (
     <View className="flex-1 bg-gray-50 items-center justify-center p-6">
       <View className="bg-white rounded-3xl p-8 w-full max-w-md shadow-sm border border-gray-100">
-        
-        {/* Close Button for Modal display */}
-        <TouchableOpacity 
-          onPress={() => router.back()} 
+
+        {/* Close Button */}
+        <TouchableOpacity
+          onPress={dismissModal}
           className="absolute top-4 right-4 w-8 h-8 items-center justify-center bg-gray-50 rounded-full"
         >
           <Text className="text-gray-400 font-bold text-sm">✕</Text>
@@ -162,23 +177,20 @@ export default function AuthModal() {
           <View className="flex-1 h-[1px] bg-gray-200" />
         </View>
 
-        {/* Google Authentication */}
+        {/* Google Authentication Button */}
         <TouchableOpacity
           onPress={handleGoogleSignIn}
           disabled={isLoading}
           className="flex-row items-center justify-center border border-gray-200 bg-white rounded-2xl py-3 w-full gap-3 shadow-sm mb-6"
         >
-          <Image
-            source={require('@/assets/images/google.svg')}
-            style={{ width: 20, height: 20 }}
-          />
+          <Text className="text-blue-600 font-black text-base">G</Text>
           <Text className="text-gray-700 font-bold text-sm">
             Continue with Google
           </Text>
         </TouchableOpacity>
 
         {/* Toggle Mode */}
-        <TouchableOpacity 
+        <TouchableOpacity
           onPress={() => setIsSignUp(!isSignUp)}
           className="items-center"
         >

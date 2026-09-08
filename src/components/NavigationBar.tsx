@@ -1,9 +1,9 @@
 import { useTheme } from '@/hooks/use-theme';
+import { supabase } from '@/utils/supabase/client';
 import { Image } from 'expo-image';
 import { useLocalSearchParams, useRouter } from 'expo-router';
-import React, { useState, useEffect } from 'react';
+import React, { useEffect, useState } from 'react';
 import { Text, TextInput, TouchableOpacity, View } from 'react-native';
-import { supabase } from '@/utils/supabase/client';
 
 export function NavigationBar() {
   const router = useRouter();
@@ -104,7 +104,7 @@ export function NavigationBar() {
           />
         </TouchableOpacity>
 
-        <TouchableOpacity 
+        <TouchableOpacity
           onPress={() => {
             if (isAuthenticated) {
               router.push('/profile' as any);
