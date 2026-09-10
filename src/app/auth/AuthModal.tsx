@@ -11,6 +11,14 @@ export default function AuthModal() {
   const [isSignUp, setIsSignUp] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
 
+  const dismissModal = () => {
+    if (router.canGoBack()) {
+      router.back();
+    } else {
+      router.replace('/');
+    }
+  };
+
   useEffect(() => {
     if (Platform.OS !== 'web') {
       try {
@@ -21,15 +29,17 @@ export default function AuthModal() {
         console.error('GoogleSignin configure error:', error);
       }
     }
-  }, []);
 
-  const dismissModal = () => {
-    if (router.canGoBack()) {
-      router.back();
-    } else {
-      router.replace('/');
-    }
-  };
+    const { data: { subscription } } = supabase.auth.onAuthStateChange((event, session) => {
+      if (session && (event === 'SIGNED_IN' || event === 'TOKEN_REFRESHED')) {
+        dismissModal();
+      }
+    });
+
+    return () => {
+      subscription.unsubscribe();
+    };
+  }, []);
 
   const handleAuth = async () => {
     if (!email.trim() || !password.trim()) {

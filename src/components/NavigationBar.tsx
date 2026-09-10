@@ -14,6 +14,18 @@ export function NavigationBar() {
   const [isAuthenticated, setIsAuthenticated] = useState(false);
   const [avatarUrl, setAvatarUrl] = useState<string | null>(null);
 
+  console.log(" Outer sAuthenticated", isAuthenticated);
+
+  const handleAuthProfilePress = () => {
+    console.log("isAuthenticated", isAuthenticated);
+
+    if (isAuthenticated) {
+      router.push('/profile');
+    } else {
+      router.push('/auth/AuthModal');
+    }
+  };
+
   useEffect(() => {
     supabase.auth.getSession().then(({ data: { session } }) => {
       setIsAuthenticated(!!session);
@@ -105,13 +117,7 @@ export function NavigationBar() {
         </TouchableOpacity>
 
         <TouchableOpacity
-          onPress={() => {
-            if (isAuthenticated) {
-              router.push('/profile' as any);
-            } else {
-              router.push('/auth/AuthModal' as any);
-            }
-          }}
+          onPress={handleAuthProfilePress}
           className="w-11 h-11 rounded-full overflow-hidden border border-gray-200 bg-gray-50 items-center justify-center"
         >
           {avatarUrl ? (
