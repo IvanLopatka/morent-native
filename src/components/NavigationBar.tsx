@@ -14,15 +14,19 @@ export function NavigationBar() {
   const [isAuthenticated, setIsAuthenticated] = useState(false);
   const [avatarUrl, setAvatarUrl] = useState<string | null>(null);
 
-  console.log(" Outer sAuthenticated", isAuthenticated);
+  const isNavigatingRef = React.useRef(false);
 
   const handleAuthProfilePress = () => {
-    console.log("isAuthenticated", isAuthenticated);
+    if (isNavigatingRef.current) return;
+    isNavigatingRef.current = true;
+    setTimeout(() => {
+      isNavigatingRef.current = false;
+    }, 600);
 
     if (isAuthenticated) {
-      router.push('/profile');
+      router.push('/profile' as any);
     } else {
-      router.push('/auth/AuthModal');
+      router.push('/auth' as any);
     }
   };
 

@@ -39,11 +39,7 @@ export default function ProfileScreen() {
         setIsLoading(false);
       } else {
         setIsLoading(false);
-        // Only redirect if unauthenticated after initial auth check
-        router.replace('/');
-        setTimeout(() => {
-          router.push('/auth/AuthModal' as any);
-        }, 50);
+        router.replace('/auth' as any);
       }
     });
 
