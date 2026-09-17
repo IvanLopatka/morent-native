@@ -1,12 +1,12 @@
-import React, { useEffect, useState } from 'react';
-import { View, Text, TouchableOpacity, ActivityIndicator, ScrollView, Platform } from 'react-native';
-import { useRouter } from 'expo-router';
-import { Image } from 'expo-image';
-import { supabase } from '@/utils/supabase/client';
 import { NavigationBar } from '@/components/NavigationBar';
-import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { BottomTabInset, MaxContentWidth, Spacing } from '@/constants/theme';
 import { useTheme } from '@/hooks/use-theme';
+import { supabase } from '@/utils/supabase/client';
+import { Image } from 'expo-image';
+import { useRouter } from 'expo-router';
+import React, { useEffect, useState } from 'react';
+import { ActivityIndicator, Platform, ScrollView, Text, TouchableOpacity, View } from 'react-native';
+import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
 interface UserProfile {
   email?: string;
@@ -20,12 +20,19 @@ export default function ProfileScreen() {
   const router = useRouter();
   const safeAreaInsets = useSafeAreaInsets();
   const theme = useTheme();
-  
+
   const [isLoading, setIsLoading] = useState(true);
   const [user, setUser] = useState<UserProfile | null>(null);
 
   useEffect(() => {
-    // Listen for auth state changes so we don't redirect before storage finishes persisting session
+    // Отримуємо поточну сесію перед тим, як покладатись лише на підписку
+    supabase.auth.getSession().then(({ data: { session } }) => {
+      if (!session) {
+        setIsLoading(false);
+        router.replace('/');
+      }
+    });
+
     const { data: { subscription } } = supabase.auth.onAuthStateChange((_event, session) => {
       if (session) {
         const authUser = session.user;
@@ -39,11 +46,7 @@ export default function ProfileScreen() {
         setIsLoading(false);
       } else {
         setIsLoading(false);
-        // Only redirect if unauthenticated after initial auth check
         router.replace('/');
-        setTimeout(() => {
-          router.push('/auth/AuthModal' as any);
-        }, 50);
       }
     });
 
@@ -100,10 +103,10 @@ export default function ProfileScreen() {
     >
       <View style={{ width: '100%', maxWidth: MaxContentWidth }}>
         <NavigationBar />
-        
+
         <View className="p-6 w-full items-center">
           <View className="bg-white rounded-3xl p-8 w-full max-w-xl shadow-sm border border-gray-100 items-center">
-            
+
             {/* Avatar / Profile Image */}
             <View className="w-24 h-24 rounded-full overflow-hidden border-4 border-blue-50 bg-gray-100 mb-4 shadow-sm">
               {user.avatarUrl ? (

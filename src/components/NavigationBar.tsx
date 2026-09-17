@@ -11,13 +11,17 @@ export function NavigationBar() {
   const searchParam = (params.search as string) || '';
   const [searchVal, setSearchVal] = useState(searchParam);
   const theme = useTheme();
+  const [isLoading, setIsLoading] = useState(false);
   const [isAuthenticated, setIsAuthenticated] = useState(false);
   const [avatarUrl, setAvatarUrl] = useState<string | null>(null);
 
-  console.log(" Outer sAuthenticated", isAuthenticated);
+
+  console.log(" Outer isAuthenticated", isAuthenticated);
+  console.log("Avatar URL is:", avatarUrl, typeof avatarUrl);
 
   const handleAuthProfilePress = () => {
-    console.log("isAuthenticated", isAuthenticated);
+    if (isLoading) return;
+
 
     if (isAuthenticated) {
       router.push('/profile');
@@ -27,17 +31,25 @@ export function NavigationBar() {
   };
 
   useEffect(() => {
+    let isMounted = true;
     supabase.auth.getSession().then(({ data: { session } }) => {
-      setIsAuthenticated(!!session);
-      setAvatarUrl(session?.user?.user_metadata?.avatar_url || session?.user?.user_metadata?.picture || null);
+      if (isMounted) {
+        setIsAuthenticated(!!session);
+        setAvatarUrl(session?.user?.user_metadata?.avatar_url || session?.user?.user_metadata?.picture || null);
+        setIsLoading(false);
+      }
     });
 
     const { data: { subscription } } = supabase.auth.onAuthStateChange((_event, session) => {
-      setIsAuthenticated(!!session);
-      setAvatarUrl(session?.user?.user_metadata?.avatar_url || session?.user?.user_metadata?.picture || null);
+      if (isMounted) {
+        setIsAuthenticated(!!session);
+        setAvatarUrl(session?.user?.user_metadata?.avatar_url || session?.user?.user_metadata?.picture || null);
+        setIsLoading(false);
+      }
     });
 
     return () => {
+      isMounted = false;
       subscription.unsubscribe();
     };
   }, []);
@@ -118,20 +130,15 @@ export function NavigationBar() {
 
         <TouchableOpacity
           onPress={handleAuthProfilePress}
+          disabled={isLoading}
           className="w-11 h-11 rounded-full overflow-hidden border border-gray-200 bg-gray-50 items-center justify-center"
         >
-          {avatarUrl ? (
-            <Image
-              source={{ uri: avatarUrl }}
-              className="w-full h-full"
-              contentFit="cover"
-            />
+          {typeof avatarUrl === 'string' && avatarUrl.startsWith('http') ? (
+            <View className="bg-red-500 z-50 w-full h-full" />
           ) : (
-            <Image
-              source={require('@/assets/images/profile.svg')}
+            <View
               className="w-full h-full"
-              contentFit="cover"
-            />
+            ></View>
           )}
         </TouchableOpacity>
       </View>
