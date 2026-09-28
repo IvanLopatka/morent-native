@@ -1,7 +1,7 @@
 import { supabase } from '@/utils/supabase/client';
 import { Image } from 'expo-image';
 import { useRouter } from 'expo-router';
-import { useEffect, useRef, useState } from 'react';
+import { useEffect, useState } from 'react';
 import { StyleSheet, Text, TouchableOpacity, View } from 'react-native';
 
 /**
@@ -16,7 +16,6 @@ export function useNavigationHeader() {
   const router = useRouter();
   const [isAuthenticated, setIsAuthenticated] = useState(false);
   const [avatarUrl, setAvatarUrl] = useState<string | null>(null);
-  const isNavigatingRef = useRef(false);
 
   useEffect(() => {
     supabase.auth.getSession().then(({ data: { session } }) => {
@@ -43,12 +42,6 @@ export function useNavigationHeader() {
   }, []);
 
   const handleProfilePress = () => {
-    if (isNavigatingRef.current) return;
-    isNavigatingRef.current = true;
-    setTimeout(() => {
-      isNavigatingRef.current = false;
-    }, 600);
-
     if (isAuthenticated) {
       router.push('/profile' as any);
     } else {
