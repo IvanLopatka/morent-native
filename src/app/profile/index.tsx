@@ -38,11 +38,23 @@ export default function ProfileScreen() {
   );
 
   useEffect(() => {
+    let isMounted = true;
+
+    // Check existing session on mount
+    supabase.auth.getSession().then(({ data: { session } }) => {
+      if (!isMounted) return;
+      if (!session) {
+        setIsLoading(false);
+        router.replace('/auth' as any);
+      }
+    });
+
     // Listen for auth state changes so we don't redirect before storage finishes persisting session
     const {
       data: { subscription },
     } = supabase.auth.onAuthStateChange(
       (_event, session) => {
+        if (!isMounted) return;
         if (session) {
           const authUser = session.user;
           setUser({
@@ -67,6 +79,7 @@ export default function ProfileScreen() {
     );
 
     return () => {
+      isMounted = false;
       subscription.unsubscribe();
     };
   }, []);

@@ -19,11 +19,8 @@ export function NavigationBar() {
   const searchParam = (params.search as string) || '';
   const [searchVal, setSearchVal] = useState(searchParam);
   const theme = useTheme();
-  const [isAuthenticated, setIsAuthenticated] =
-    useState(false);
-  const [avatarUrl, setAvatarUrl] = useState<string | null>(
-    null
-  );
+  const [isAuthenticated, setIsAuthenticated] = useState(false);
+  const [avatarUrl, setAvatarUrl] = useState<string | null>(null);
 
   const isNavigatingRef = React.useRef(false);
 
@@ -42,21 +39,9 @@ export function NavigationBar() {
   };
 
   useEffect(() => {
-    supabase.auth
-      .getSession()
-      .then(({ data: { session } }) => {
-        setIsAuthenticated(!!session);
-        setAvatarUrl(
-          session?.user?.user_metadata?.avatar_url ||
-            session?.user?.user_metadata?.picture ||
-            null
-        );
-      });
-
-    const {
-      data: { subscription },
-    } = supabase.auth.onAuthStateChange(
-      (_event, session) => {
+    let isMounted = true;
+    supabase.auth.getSession().then(({ data: { session } }) => {
+      if (isMounted) {
         setIsAuthenticated(!!session);
         setAvatarUrl(
           session?.user?.user_metadata?.avatar_url ||
@@ -64,9 +49,23 @@ export function NavigationBar() {
             null
         );
       }
-    );
+    });
+
+    const {
+      data: { subscription },
+    } = supabase.auth.onAuthStateChange((_event, session) => {
+      if (isMounted) {
+        setIsAuthenticated(!!session);
+        setAvatarUrl(
+          session?.user?.user_metadata?.avatar_url ||
+            session?.user?.user_metadata?.picture ||
+            null
+        );
+      }
+    });
 
     return () => {
+      isMounted = false;
       subscription.unsubscribe();
     };
   }, []);
