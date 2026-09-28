@@ -1,9 +1,17 @@
 import { useTheme } from '@/hooks/use-theme';
 import { supabase } from '@/utils/supabase/client';
 import { Image } from 'expo-image';
-import { useLocalSearchParams, useRouter } from 'expo-router';
+import {
+  useLocalSearchParams,
+  useRouter,
+} from 'expo-router';
 import React, { useEffect, useState } from 'react';
-import { Text, TextInput, TouchableOpacity, View } from 'react-native';
+import {
+  Text,
+  TextInput,
+  TouchableOpacity,
+  View,
+} from 'react-native';
 
 export function NavigationBar() {
   const router = useRouter();
@@ -11,8 +19,11 @@ export function NavigationBar() {
   const searchParam = (params.search as string) || '';
   const [searchVal, setSearchVal] = useState(searchParam);
   const theme = useTheme();
-  const [isAuthenticated, setIsAuthenticated] = useState(false);
-  const [avatarUrl, setAvatarUrl] = useState<string | null>(null);
+  const [isAuthenticated, setIsAuthenticated] =
+    useState(false);
+  const [avatarUrl, setAvatarUrl] = useState<string | null>(
+    null
+  );
 
   const isNavigatingRef = React.useRef(false);
 
@@ -31,15 +42,29 @@ export function NavigationBar() {
   };
 
   useEffect(() => {
-    supabase.auth.getSession().then(({ data: { session } }) => {
-      setIsAuthenticated(!!session);
-      setAvatarUrl(session?.user?.user_metadata?.avatar_url || session?.user?.user_metadata?.picture || null);
-    });
+    supabase.auth
+      .getSession()
+      .then(({ data: { session } }) => {
+        setIsAuthenticated(!!session);
+        setAvatarUrl(
+          session?.user?.user_metadata?.avatar_url ||
+            session?.user?.user_metadata?.picture ||
+            null
+        );
+      });
 
-    const { data: { subscription } } = supabase.auth.onAuthStateChange((_event, session) => {
-      setIsAuthenticated(!!session);
-      setAvatarUrl(session?.user?.user_metadata?.avatar_url || session?.user?.user_metadata?.picture || null);
-    });
+    const {
+      data: { subscription },
+    } = supabase.auth.onAuthStateChange(
+      (_event, session) => {
+        setIsAuthenticated(!!session);
+        setAvatarUrl(
+          session?.user?.user_metadata?.avatar_url ||
+            session?.user?.user_metadata?.picture ||
+            null
+        );
+      }
+    );
 
     return () => {
       subscription.unsubscribe();
@@ -59,7 +84,9 @@ export function NavigationBar() {
     >
       {/* Left Section: Brand Logo */}
       <View className="flex-row items-center gap-16">
-        <TouchableOpacity onPress={() => router.push('/' as any)}>
+        <TouchableOpacity
+          onPress={() => router.push('/' as any)}
+        >
           <Text className="text-[#3563E9] text-2xl font-bold tracking-tight">
             MORENT
           </Text>
