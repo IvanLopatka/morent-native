@@ -19,7 +19,7 @@ export default function RootLayout() {
         <Stack screenOptions={{ headerShown: false }}>
           <Stack.Screen name="index" />
           <Stack.Screen name="explore" />
-          <Stack.Screen name="auth/AuthModal" options={{ presentation: 'modal' }} />
+          <Stack.Screen name="(auth)" options={{ presentation: 'modal' }} />
           <Stack.Screen name="profile/index" />
         </Stack>
       </ThemeProvider>

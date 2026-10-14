@@ -1,9 +1,17 @@
 import { useTheme } from '@/hooks/use-theme';
 import { supabase } from '@/utils/supabase/client';
 import { Image } from 'expo-image';
-import { useLocalSearchParams, useRouter } from 'expo-router';
+import {
+  useLocalSearchParams,
+  useRouter,
+} from 'expo-router';
 import React, { useEffect, useState } from 'react';
-import { Text, TextInput, TouchableOpacity, View } from 'react-native';
+import {
+  Text,
+  TextInput,
+  TouchableOpacity,
+  View,
+} from 'react-native';
 
 export function NavigationBar() {
   const router = useRouter();
@@ -14,18 +22,42 @@ export function NavigationBar() {
   const [isAuthenticated, setIsAuthenticated] = useState(false);
   const [avatarUrl, setAvatarUrl] = useState<string | null>(null);
 
+  const handleAuthProfilePress = () => {
+    if (isAuthenticated) {
+      router.push('/profile' as any);
+    } else {
+      router.push('/login' as any);
+    }
+  };
+
   useEffect(() => {
+    let isMounted = true;
     supabase.auth.getSession().then(({ data: { session } }) => {
-      setIsAuthenticated(!!session);
-      setAvatarUrl(session?.user?.user_metadata?.avatar_url || session?.user?.user_metadata?.picture || null);
+      if (isMounted) {
+        setIsAuthenticated(!!session);
+        setAvatarUrl(
+          session?.user?.user_metadata?.avatar_url ||
+            session?.user?.user_metadata?.picture ||
+            null
+        );
+      }
     });
 
-    const { data: { subscription } } = supabase.auth.onAuthStateChange((_event, session) => {
-      setIsAuthenticated(!!session);
-      setAvatarUrl(session?.user?.user_metadata?.avatar_url || session?.user?.user_metadata?.picture || null);
+    const {
+      data: { subscription },
+    } = supabase.auth.onAuthStateChange((_event, session) => {
+      if (isMounted) {
+        setIsAuthenticated(!!session);
+        setAvatarUrl(
+          session?.user?.user_metadata?.avatar_url ||
+            session?.user?.user_metadata?.picture ||
+            null
+        );
+      }
     });
 
     return () => {
+      isMounted = false;
       subscription.unsubscribe();
     };
   }, []);
@@ -43,7 +75,9 @@ export function NavigationBar() {
     >
       {/* Left Section: Brand Logo */}
       <View className="flex-row items-center gap-16">
-        <TouchableOpacity onPress={() => router.push('/' as any)}>
+        <TouchableOpacity
+          onPress={() => router.push('/' as any)}
+        >
           <Text className="text-[#3563E9] text-2xl font-bold tracking-tight">
             MORENT
           </Text>
@@ -105,13 +139,7 @@ export function NavigationBar() {
         </TouchableOpacity>
 
         <TouchableOpacity
-          onPress={() => {
-            if (isAuthenticated) {
-              router.push('/profile' as any);
-            } else {
-              router.push('/auth/AuthModal' as any);
-            }
-          }}
+          onPress={handleAuthProfilePress}
           className="w-11 h-11 rounded-full overflow-hidden border border-gray-200 bg-gray-50 items-center justify-center"
         >
           {avatarUrl ? (
