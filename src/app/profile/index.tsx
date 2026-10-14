@@ -45,7 +45,7 @@ export default function ProfileScreen() {
       if (!isMounted) return;
       if (!session) {
         setIsLoading(false);
-        router.replace('/auth' as any);
+        router.replace('/login' as any);
       }
     });
 
@@ -73,7 +73,7 @@ export default function ProfileScreen() {
           setIsLoading(false);
         } else {
           setIsLoading(false);
-          router.replace('/auth' as any);
+          router.replace('/login' as any);
         }
       }
     );

@@ -26,7 +26,7 @@ export function NavigationBar() {
     if (isAuthenticated) {
       router.push('/profile' as any);
     } else {
-      router.push('/auth' as any);
+      router.push('/login' as any);
     }
   };
 
