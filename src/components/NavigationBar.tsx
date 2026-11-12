@@ -1,45 +1,76 @@
-import { useTheme } from '@/hooks/use-theme';
 import { supabase } from '@/utils/supabase/client';
 import { Image } from 'expo-image';
-import {
-  useLocalSearchParams,
-  useRouter,
-} from 'expo-router';
+import { usePathname, useRouter } from 'expo-router';
 import React, { useEffect, useState } from 'react';
 import {
+  Platform,
+  StyleSheet,
   Text,
-  TextInput,
   TouchableOpacity,
   View,
 } from 'react-native';
+import { useSafeAreaInsets } from 'react-native-safe-area-context';
+
+interface NavItemConfig {
+  id: 'home' | 'catalog' | 'settings' | 'profile';
+  label: string;
+  route: string;
+  icon: any;
+  activeIcon: any;
+  isActive: (pathname: string) => boolean;
+}
+
+const NAV_ITEMS: NavItemConfig[] = [
+  {
+    id: 'home',
+    label: 'Home',
+    route: '/',
+    icon: require('@/assets/images/nav-home.svg'),
+    activeIcon: require('@/assets/images/nav-home-active.svg'),
+    isActive: (pathname: string) => pathname === '/',
+  },
+  {
+    id: 'catalog',
+    label: 'Catalog',
+    route: '/catalog',
+    icon: require('@/assets/images/nav-catalog.svg'),
+    activeIcon: require('@/assets/images/nav-catalog-active.svg'),
+    isActive: (pathname: string) =>
+      pathname === '/catalog' ||
+      pathname.startsWith('/catalog') ||
+      pathname === '/explore',
+  },
+  {
+    id: 'settings',
+    label: 'Settings',
+    route: '/settings',
+    icon: require('@/assets/images/nav-settings.svg'),
+    activeIcon: require('@/assets/images/nav-settings-active.svg'),
+    isActive: (pathname: string) =>
+      pathname === '/settings' || pathname.startsWith('/settings'),
+  },
+  {
+    id: 'profile',
+    label: 'Profile',
+    route: '/profile',
+    icon: require('@/assets/images/nav-profile.svg'),
+    activeIcon: require('@/assets/images/nav-profile-active.svg'),
+    isActive: (pathname: string) =>
+      pathname === '/profile' || pathname.startsWith('/profile'),
+  },
+];
 
 export function NavigationBar() {
   const router = useRouter();
-  const params = useLocalSearchParams();
-  const searchParam = (params.search as string) || '';
-  const [searchVal, setSearchVal] = useState(searchParam);
-  const theme = useTheme();
+  const pathname = usePathname();
+  const safeAreaInsets = useSafeAreaInsets();
   const [isAuthenticated, setIsAuthenticated] = useState(false);
-  const [avatarUrl, setAvatarUrl] = useState<string | null>(null);
-
-  const handleAuthProfilePress = () => {
-    if (isAuthenticated) {
-      router.push('/profile' as any);
-    } else {
-      router.push('/auth' as any);
-    }
-  };
 
   useEffect(() => {
     let isMounted = true;
     supabase.auth.getSession().then(({ data: { session } }) => {
       if (isMounted) {
         setIsAuthenticated(!!session);
-        setAvatarUrl(
-          session?.user?.user_metadata?.avatar_url ||
-            session?.user?.user_metadata?.picture ||
-            null
-        );
       }
     });
 
@@ -48,11 +79,6 @@ export function NavigationBar() {
     } = supabase.auth.onAuthStateChange((_event, session) => {
       if (isMounted) {
         setIsAuthenticated(!!session);
-        setAvatarUrl(
-          session?.user?.user_metadata?.avatar_url ||
-            session?.user?.user_metadata?.picture ||
-            null
-        );
       }
     });
 
@@ -62,101 +88,164 @@ export function NavigationBar() {
     };
   }, []);
 
-  const handleSearch = (val: string) => {
-    setSearchVal(val);
-    // Debounce or update route params
-    router.setParams({ search: val.trim() });
+  // Hide the navigation bar on modal / auth pages
+  if (pathname === '/auth' || pathname?.startsWith('/auth')) {
+    return null;
+  }
+
+  const handlePress = (item: NavItemConfig) => {
+    if (item.id === 'profile') {
+      if (isAuthenticated) {
+        if (pathname !== '/profile') {
+          router.push('/profile' as any);
+        }
+      } else {
+        router.push('/auth' as any);
+      }
+      return;
+    }
+
+    if (item.id === 'home') {
+      if (pathname !== '/') {
+        router.push('/' as any);
+      }
+      return;
+    }
+
+    if (item.id === 'catalog') {
+      if (!pathname.startsWith('/catalog')) {
+        router.push('/catalog' as any);
+      }
+      return;
+    }
+
+    if (item.id === 'settings') {
+      if (!pathname.startsWith('/settings')) {
+        router.push('/settings' as any);
+      }
+      return;
+    }
   };
+
+  const isWeb = Platform.OS === 'web';
 
   return (
     <View
-      className="w-full border-b border-gray-100 bg-white py-4 px-6 md:px-16 flex-row items-center justify-between z-50"
-      style={{ borderBottomColor: theme.backgroundElement }}
+      style={[
+        styles.container,
+        isWeb ? styles.webFixed : styles.nativeFixed,
+        {
+          paddingBottom: Math.max(safeAreaInsets.bottom, 10),
+          backgroundColor: '#ffffff',
+          borderTopColor: '#f1f5f9',
+        },
+      ]}
     >
-      {/* Left Section: Brand Logo */}
-      <View className="flex-row items-center gap-16">
-        <TouchableOpacity
-          onPress={() => router.push('/' as any)}
-        >
-          <Text className="text-[#3563E9] text-2xl font-bold tracking-tight">
-            MORENT
-          </Text>
-        </TouchableOpacity>
+      <View style={styles.content}>
+        {NAV_ITEMS.map((item) => {
+          const active = item.isActive(pathname);
+          return (
+            <TouchableOpacity
+              key={item.id}
+              onPress={() => handlePress(item)}
+              activeOpacity={0.7}
+              accessibilityRole="tab"
+              accessibilityLabel={item.label}
+              accessibilityState={{ selected: active }}
+              style={styles.tabButton}
+            >
+              {active && <View style={styles.activeBar} />}
 
-        {/* Middle Section: Search Bar (Hidden on smaller screens, shown on md and up) */}
-        <View className="hidden md:flex flex-row items-center bg-white border border-gray-200 rounded-full px-5 py-2.5 w-[492px] h-11 relative">
-          <Image
-            source={require('@/assets/images/search.svg')}
-            className="w-5 h-5 mr-3 text-gray-500"
-            tintColor="#596780"
-          />
-          <TextInput
-            value={searchVal}
-            onChangeText={handleSearch}
-            placeholder="Search something here"
-            placeholderTextColor="#596780"
-            className="flex-1 text-sm font-medium text-[#596780] outline-none"
-          />
-          <TouchableOpacity className="absolute right-4">
-            <Image
-              source={require('@/assets/images/filter.svg')}
-              className="w-5 h-5 text-gray-500"
-              tintColor="#596780"
-            />
-          </TouchableOpacity>
-        </View>
-      </View>
+              <View style={styles.iconContainer}>
+                <Image
+                  source={active ? item.activeIcon : item.icon}
+                  style={styles.icon}
+                  contentFit="contain"
+                />
+              </View>
 
-      {/* Right Section: Actions / Profile */}
-      <View className="flex-row items-center gap-5">
-        {/* Heart/Favorites Icon */}
-        <TouchableOpacity className="w-11 h-11 border border-gray-200 rounded-full items-center justify-center hidden sm:flex">
-          <Image
-            source={require('@/assets/images/heart.svg')}
-            className="w-6 h-6"
-            tintColor="#596780"
-          />
-        </TouchableOpacity>
-
-        {/* Notification Icon */}
-        <TouchableOpacity className="w-11 h-11 border border-gray-200 rounded-full items-center justify-center relative hidden sm:flex">
-          <Image
-            source={require('@/assets/images/notification.svg')}
-            className="w-6 h-6"
-            tintColor="#596780"
-          />
-          {/* Notification Badge */}
-          <View className="absolute top-0 right-0 w-2.5 h-2.5 bg-[#FF483C] rounded-full border border-white" />
-        </TouchableOpacity>
-
-        {/* Settings Icon */}
-        <TouchableOpacity className="w-11 h-11 border border-gray-200 rounded-full items-center justify-center hidden sm:flex">
-          <Image
-            source={require('@/assets/images/setting.svg')}
-            className="w-6 h-6"
-            tintColor="#596780"
-          />
-        </TouchableOpacity>
-
-        <TouchableOpacity
-          onPress={handleAuthProfilePress}
-          className="w-11 h-11 rounded-full overflow-hidden border border-gray-200 bg-gray-50 items-center justify-center"
-        >
-          {avatarUrl ? (
-            <Image
-              source={{ uri: avatarUrl }}
-              className="w-full h-full"
-              contentFit="cover"
-            />
-          ) : (
-            <Image
-              source={require('@/assets/images/profile.svg')}
-              className="w-full h-full"
-              contentFit="cover"
-            />
-          )}
-        </TouchableOpacity>
+              <Text
+                style={[
+                  styles.label,
+                  active ? styles.labelActive : styles.labelInactive,
+                ]}
+              >
+                {item.label}
+              </Text>
+            </TouchableOpacity>
+          );
+        })}
       </View>
     </View>
   );
 }
+
+const styles = StyleSheet.create({
+  container: {
+    left: 0,
+    right: 0,
+    bottom: 0,
+    borderTopWidth: 1,
+    zIndex: 9999,
+    shadowColor: '#000000',
+    shadowOffset: { width: 0, height: -3 },
+    shadowOpacity: 0.06,
+    shadowRadius: 8,
+    elevation: 12,
+  },
+  webFixed: {
+    // @ts-ignore - position fixed is supported in react-native-web
+    position: 'fixed',
+  },
+  nativeFixed: {
+    position: 'absolute',
+  },
+  content: {
+    flexDirection: 'row',
+    justifyContent: 'space-around',
+    alignItems: 'center',
+    width: '100%',
+    maxWidth: 500,
+    alignSelf: 'center',
+    paddingTop: 8,
+    paddingHorizontal: 12,
+  },
+  tabButton: {
+    flex: 1,
+    alignItems: 'center',
+    justifyContent: 'center',
+    paddingVertical: 4,
+    position: 'relative',
+  },
+  activeBar: {
+    position: 'absolute',
+    top: -8,
+    width: 24,
+    height: 3,
+    borderRadius: 2,
+    backgroundColor: '#3563E9',
+  },
+  iconContainer: {
+    width: 26,
+    height: 26,
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  icon: {
+    width: 22,
+    height: 22,
+  },
+  label: {
+    fontSize: 11,
+    marginTop: 4,
+    letterSpacing: 0.2,
+  },
+  labelActive: {
+    color: '#3563E9',
+    fontWeight: '700',
+  },
+  labelInactive: {
+    color: '#90A3BF',
+    fontWeight: '500',
+  },
+});

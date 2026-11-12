@@ -1,13 +1,13 @@
-import { NavigationBar } from '@/components/NavigationBar';
 import {
   BottomTabInset,
   MaxContentWidth,
   Spacing,
 } from '@/constants/theme';
+import { useNavigationHeader } from '@/hooks/use-navigation-header';
 import { useTheme } from '@/hooks/use-theme';
 import { supabase } from '@/utils/supabase/client';
 import { Image } from 'expo-image';
-import { useRouter } from 'expo-router';
+import { Stack, useRouter } from 'expo-router';
 import React, { useEffect, useState } from 'react';
 import {
   ActivityIndicator,
@@ -31,6 +31,7 @@ export default function ProfileScreen() {
   const router = useRouter();
   const safeAreaInsets = useSafeAreaInsets();
   const theme = useTheme();
+  const headerOptions = useNavigationHeader();
 
   const [isLoading, setIsLoading] = useState(true);
   const [user, setUser] = useState<UserProfile | null>(
@@ -119,26 +120,26 @@ export default function ProfileScreen() {
   if (!user) return null;
 
   return (
-    <ScrollView
-      removeClippedSubviews={false}
-      style={{ flex: 1, backgroundColor: theme.background }}
-      contentContainerStyle={[
-        {
-          paddingBottom:
-            safeAreaInsets.bottom +
-            BottomTabInset +
-            Spacing.four,
-          alignItems: 'center',
-        },
-        contentPlatformStyle,
-      ]}
-    >
-      <View
-        style={{ width: '100%', maxWidth: MaxContentWidth }}
+    <>
+      <Stack.Screen options={headerOptions} />
+      <ScrollView
+        removeClippedSubviews={false}
+        style={{ flex: 1, backgroundColor: theme.background }}
+        contentContainerStyle={[
+          {
+            paddingBottom:
+              safeAreaInsets.bottom +
+              BottomTabInset +
+              Spacing.four,
+            alignItems: 'center',
+          },
+          contentPlatformStyle,
+        ]}
       >
-        <NavigationBar />
-
-        <View className="p-6 w-full items-center">
+        <View
+          style={{ width: '100%', maxWidth: MaxContentWidth }}
+        >
+          <View className="p-6 w-full items-center">
           <View className="bg-white rounded-3xl p-8 w-full max-w-xl shadow-sm border border-gray-100 items-center">
             {/* Avatar / Profile Image */}
             <View className="w-24 h-24 rounded-full overflow-hidden border-4 border-blue-50 bg-gray-100 mb-4 shadow-sm">
@@ -232,5 +233,6 @@ export default function ProfileScreen() {
         </View>
       </View>
     </ScrollView>
+    </>
   );
 }
